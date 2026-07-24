@@ -3,7 +3,7 @@ import { Provider, ModelSettings } from './types';
 
 export const DEFAULT_SETTINGS: ModelSettings = {
   provider: 'gemini',
-  model: 'gemini-3-flash-preview', // Might need an older fallback or latest gemini depending on availability, but 3-flash is specified in the old code
+  model: 'gemini-3.6-flash',
   apiKey: '',
   temperature: 1.2
 };
@@ -47,12 +47,49 @@ export function saveSettingsB(settings: ModelSettings) {
     localStorage.setItem('sea_model_settings_b', JSON.stringify(settings));
 }
 
+export function sanitizeGeminiModel(modelName?: string): string {
+    let m = (modelName || 'gemini-3.6-flash').trim();
+    if (m.startsWith('models/')) {
+        m = m.replace(/^models\//, '');
+    }
+    return m || 'gemini-3.6-flash';
+}
+
 export async function fetchAvailableModels(provider: Provider, apiKey?: string, baseUrl?: string): Promise<string[]> {
     try {
         if (provider === 'gemini') {
+            const finalApiKey = (apiKey && apiKey.trim()) || (process.env.API_KEY as string) || '';
+            if (finalApiKey) {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(finalApiKey)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data.models) && data.models.length > 0) {
+                            const realModels = data.models
+                                .filter((m: any) => {
+                                    const methods = m.supportedGenerationMethods || [];
+                                    const name = m.name || '';
+                                    return methods.includes('generateContent') && (name.includes('gemini') || name.includes('gemma'));
+                                })
+                                .map((m: any) => m.name.replace(/^models\//, ''));
+                            if (realModels.length > 0) {
+                                // Guarantee modern flash models are present in list if supported
+                                const fullSet = Array.from(new Set(['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', ...realModels]));
+                                return fullSet.sort((a: string, b: string) => a.localeCompare(b));
+                            }
+                        }
+                    }
+                } catch (apiError) {
+                    console.warn("Failed to query live Gemini models API, falling back to default list", apiError);
+                }
+            }
             return [
-                'gemini-3-flash-preview',
+                'gemini-3.6-flash',
+                'gemini-3.5-flash',
+                'gemini-3.5-flash-lite',
+                'gemini-3.0-flash',
                 'gemini-2.5-flash',
+                'gemini-2.5-pro',
                 'gemini-2.0-flash',
                 'gemini-2.0-flash-lite-preview-02-05',
                 'gemini-1.5-flash',
@@ -166,11 +203,22 @@ export async function generateContentStream(prompt: string, settings: ModelSetti
         }
         parts.push({ text: prompt });
         
-        const responseStream = await ai.models.generateContentStream({
-            model: model || 'gemini-3-flash-preview',
-            contents: [{ parts, role: 'user' }],
-            config: { temperature }
-        });
+        const requestedModel = sanitizeGeminiModel(model);
+        let responseStream;
+        try {
+            responseStream = await ai.models.generateContentStream({
+                model: requestedModel,
+                contents: [{ parts, role: 'user' }],
+                config: { temperature }
+            });
+        } catch (err: any) {
+            console.warn(`Model ${requestedModel} failed, retrying with gemini-2.5-flash fallback.`, err);
+            responseStream = await ai.models.generateContentStream({
+                model: 'gemini-2.5-flash',
+                contents: [{ parts, role: 'user' }],
+                config: { temperature }
+            });
+        }
         return responseStream;
     }
 
@@ -249,12 +297,23 @@ export async function generateContent(prompt: string, settings: ModelSettings, i
         }
         parts.push({ text: prompt });
 
-        const response = await ai.models.generateContent({
-            model: model || 'gemini-3-flash-preview',
-            contents: [{ role: 'user', parts }],
-            config: { temperature }
-        });
-        return { text: response.text || '' };
+        const requestedModel = sanitizeGeminiModel(model);
+        try {
+            const response = await ai.models.generateContent({
+                model: requestedModel,
+                contents: [{ role: 'user', parts }],
+                config: { temperature }
+            });
+            return { text: response.text || '' };
+        } catch (err: any) {
+            console.warn(`Model ${requestedModel} failed, retrying with gemini-2.5-flash fallback.`, err);
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: [{ role: 'user', parts }],
+                config: { temperature }
+            });
+            return { text: response.text || '' };
+        }
     }
 
     let url = 'https://openrouter.ai/api/v1/chat/completions';

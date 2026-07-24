@@ -6,12 +6,12 @@
 import { AppSkin, SkinComponentPreset, SkinDnaDimension } from './types';
 
 export const INITIAL_PLACEHOLDERS = [
-    "Celestial Starlight face for the Reader Chamber with deep obsidian & gold typography",
-    "Ancient Cultivation Scroll face for the Living Codex with parchment cards & faction maps",
+    "Celestial Starlight Face Family with deep obsidian & gold typography across Reader & Codex",
+    "Ancient Cultivation Scroll Face Family with parchment cards, reading viewport & faction maps",
     "Minimalist Moonlight Reader Chamber face with warm amber night mode & serif typography",
     "Void Dynasty Codex face for character profiles, lore, beasts & cultivation realms",
-    "Jade Immortal Reader face with subtle emerald atmospheric gradients & scene scoring controls",
-    "Ethereal Celestial Library Codex face with multi-column lore grid & relationship maps"
+    "Jade Immortal Face Family with emerald atmospheric gradients, scene scoring & lore index",
+    "Ethereal Celestial Library Face Family with coordinated reading chamber & world codex"
 ];
 
 export const SEN_READER_PRESETS: SkinComponentPreset[] = [
@@ -24,16 +24,18 @@ export const SEN_READER_PRESETS: SkinComponentPreset[] = [
     id: 'living_codex', 
     label: 'Living Codex', 
     instruction: 'Design a complete visual face for the Living Codex lore companion. Output a whole coordinated visual theme (color palette, materials, typography, depth, motion) featuring an interactive lore encyclopedia with character profiles, artifacts, beasts, factions, locations, power systems, and world knowledge index.' 
+  },
+  { 
+    id: 'face_family', 
+    label: 'Face Family', 
+    instruction: 'Design three complete visual Face Family directions. Each direction must contain one coordinated Reader Chamber face and one coordinated Living Codex face created from the same shared visual DNA, so they feel like a single unified theme across both surfaces.' 
   }
 ];
 
 export const SEN_READER_DNA: SkinDnaDimension[] = [
-  { key: 'theme', labelLeft: 'Dark', labelRight: 'Light', low: 'Dark', high: 'Light', defaultWeight: 20 },
-  { key: 'typography', labelLeft: 'Utilitarian', labelRight: 'Editorial', low: 'Utilitarian', high: 'Editorial', defaultWeight: 80 },
-  { key: 'layout', labelLeft: 'Dense', labelRight: 'Spacious', low: 'Dense', high: 'Spacious', defaultWeight: 70 },
-  { key: 'vibe', labelLeft: 'Clean', labelRight: 'Mystical', low: 'Clean', high: 'Mystical', defaultWeight: 60 },
-  { key: 'texture', labelLeft: 'Flat', labelRight: 'Paper/Organic', low: 'Flat', high: 'Paper/Organic', defaultWeight: 50 },
-  { key: 'era', labelLeft: 'Modern', labelRight: 'Classic', low: 'Modern', high: 'Classic', defaultWeight: 60 },
+  { key: 'theme', labelLeft: 'Dark', labelRight: 'Light', low: 'Dark', high: 'Light', defaultWeight: 0 },
+  { key: 'era', labelLeft: 'Traditional', labelRight: 'Modern', low: 'Traditional', high: 'Modern', defaultWeight: 0 },
+  { key: 'immersion', labelLeft: 'Restrained', labelRight: 'Immersive', low: 'Restrained', high: 'Immersive', defaultWeight: 0 },
 ];
 
 export const DEFAULT_SEN_SKIN: AppSkin = {

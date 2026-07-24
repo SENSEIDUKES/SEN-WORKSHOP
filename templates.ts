@@ -860,6 +860,470 @@ export const LIVING_CODEX_TEMPLATE_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+/**
+ * FIXED FACE FAMILY TEMPLATE
+ * Combines Reader Chamber and Living Codex in a paired preview container
+ * with a top Face Family navigation toolbar (#face-family-nav) and toggle tabs.
+ */
+export const FACE_FAMILY_TEMPLATE_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Family — Celestial Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500;1,700&family=Alegreya+SC:wght@500;700&family=Noto+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Rubik:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+    :root {
+      --reader-font-size-scale: 1;
+      --reader-line-height: 1.65;
+      --reader-letter-spacing: 0px;
+      --reader-paragraph-spacing: 1.2em;
+      --color-bg: #030712;
+      --color-text: #F3F4F6;
+      --color-portal: #04ACFF;
+      --color-accent: #D4AF37;
+      --color-human: #FF3333;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Noto Serif', serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .family-nav-btn.active {
+      background: #04ACFF;
+      color: #030712;
+      font-weight: 700;
+    }
+
+    .reader-prose p {
+      font-size: calc(1.05rem * var(--reader-font-size-scale));
+      line-height: var(--reader-line-height);
+      margin-bottom: var(--reader-paragraph-spacing);
+    }
+
+    .codex-indicator {
+      border-bottom: 1.5px dotted var(--color-portal);
+      color: var(--color-portal);
+      cursor: pointer;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .vinyl-disc.spinning {
+      animation: spin-vinyl 4s linear infinite;
+    }
+    @keyframes spin-vinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .codex-tab.active {
+      background: rgba(4, 172, 255, 0.15);
+      border-color: #04ACFF;
+      color: #38BDF8;
+    }
+  </style>
+</head>
+<body class="theme-night font-serif min-h-screen pb-28 bg-gray-950 text-gray-100">
+
+  <!-- TOP FACE FAMILY NAVIGATION TOOLBAR (#face-family-nav) -->
+  <header id="face-family-nav" class="sticky top-0 z-50 bg-gray-950/95 border-b border-sky-500/30 backdrop-blur-md px-4 py-2.5 flex items-center justify-between gap-3 shadow-2xl">
+    <div class="flex items-center gap-2.5">
+      <span class="w-3 h-3 rounded-full bg-sky-400 animate-pulse"></span>
+      <div>
+        <span class="text-xs font-bold font-serif text-sky-400 uppercase tracking-widest block">Celestial Face Family</span>
+        <span class="text-[10px] text-gray-400 font-sans hidden sm:block">Coordinated Visual DNA • Reader Chamber + Living Codex</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5 bg-gray-900/90 border border-gray-800 p-1 rounded-xl font-sans">
+      <button id="btn-view-split" class="family-nav-btn active text-xs px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+        ⚡ <span>Paired View</span>
+      </button>
+      <button id="btn-view-reader" class="family-nav-btn text-xs px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+        📖 <span>Reader Chamber</span>
+      </button>
+      <button id="btn-view-codex" class="family-nav-btn text-xs px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+        📜 <span>Living Codex</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PAIRED SURFACE CONTAINERS -->
+  <div id="face-family-container" class="space-y-12 p-2 md:p-6">
+    
+    <!-- READER CHAMBER SURFACE SECTION (#face-family-reader-wrapper) -->
+    <section id="face-family-reader-wrapper" class="rounded-3xl border border-sky-500/20 bg-gray-950/60 p-4 md:p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-sky-500/20 pb-3 mb-6 font-sans">
+        <span class="text-xs font-bold uppercase tracking-widest text-sky-400 flex items-center gap-2">
+          📖 Reader Chamber Visual Surface
+        </span>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-sky-950 border border-sky-500/30 text-sky-300">Coordinated Face DNA</span>
+      </div>
+
+      <!-- HEADER CHAMBER (#reader-header) -->
+      <header id="reader-header" class="sticky top-12 z-40 w-full backdrop-blur-md bg-gray-950/85 border-b border-gray-800/80 px-4 py-3 rounded-2xl transition-all duration-200">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <a href="#back" class="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span id="story-title" class="text-xs uppercase tracking-widest text-sky-400 font-semibold font-sans">Celestial Library: Eternal Dao</span>
+                <span id="sealed-badge" class="lock-indicator hidden sm:inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-sans">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Sealed Scripture
+                </span>
+              </div>
+              <h1 id="chapter-title" class="text-sm md:text-base font-bold text-gray-100 truncate max-w-xs md:max-w-md font-serif">
+                Chapter 42: The Nine Heavens Alignment
+              </h1>
+            </div>
+          </div>
+
+          <div class="hidden lg:flex items-center gap-2">
+            <span id="power-stage-badge" class="text-xs px-2.5 py-1 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-300 font-sans tracking-wide">
+              Foundation Establishment Peak
+            </span>
+            <span id="continuity-divergence-badge" class="continuity-fault hidden text-xs px-2 py-0.5 rounded bg-red-950/80 border border-red-500/30 text-red-400 font-sans">
+              Timeline Fault: Divergence
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <select id="chapter-select" class="hidden sm:block text-xs bg-gray-900 border border-gray-800 text-gray-300 rounded-lg px-2.5 py-1.5">
+              <option value="42">Ch. 42: Nine Heavens</option>
+              <option value="43">Ch. 43: Ancestral Dao</option>
+            </select>
+            <button id="audio-widget" class="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:text-sky-400 relative">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            </button>
+            <button id="btn-mark-read" class="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:text-emerald-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+            <button id="btn-preferences" class="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:text-sky-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            </button>
+            <button id="btn-bookmarks" class="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:text-amber-400 relative">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              <span id="bookmark-badge" class="absolute -top-1 -right-1 text-[10px] bg-amber-500 text-black font-bold rounded-full w-4 h-4 flex items-center justify-center">3</span>
+            </button>
+            <button id="btn-fullscreen" class="hidden sm:p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEWPORT (#reader-viewport) -->
+      <main id="reader-viewport" class="max-w-3xl mx-auto px-2 md:px-6 py-6">
+        <div id="chapter-hero" class="mb-8 rounded-2xl border border-sky-500/20 bg-gradient-to-b from-sky-950/40 to-gray-950 p-6 relative">
+          <div id="hero-image" class="w-full h-44 rounded-xl bg-cover bg-center mb-4 border border-gray-800 shadow-2xl" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop')"></div>
+          <h2 class="text-xl md:text-2xl font-bold text-gray-100 font-serif mb-2">The Alignment of the Nine Stellar Arrays</h2>
+          <p class="text-xs text-gray-400 font-sans">Xiao Chen stands atop Void Cauldron Peak, observing the karmic threads connecting all living beings.</p>
+        </div>
+
+        <article class="reader-prose space-y-5 text-gray-200">
+          <p data-paragraph-index="1" class="relative group">
+            <span class="bm-trigger absolute -left-6 top-1 opacity-0 group-hover:opacity-100 text-amber-500 cursor-pointer">🔖</span>
+            The night sky above <span class="codex-indicator" data-codex-term="Void Cauldron Peak" data-codex-desc="The sacred pinnacle where ancient cultivators aligned heavenly star arrays.">Void Cauldron Peak</span> shimmered with ethereal violet light.
+          </p>
+          <p data-paragraph-index="2" class="relative group">
+            <span class="bm-trigger absolute -left-6 top-1 opacity-0 group-hover:opacity-100 text-amber-500 cursor-pointer">🔖</span>
+            Xiao Chen closed his eyes, extending his divine sense into the <span class="codex-indicator" data-codex-term="Nine Heavens Star Array" data-codex-desc="A supreme spatial formation created during the Primordial Era.">Nine Heavens Star Array</span>.
+          </p>
+        </article>
+
+        <div id="codex-tooltip" class="hidden fixed z-50 max-w-xs p-4 bg-gray-900/95 border border-sky-500/40 rounded-xl shadow-2xl text-xs font-sans">
+          <div class="flex justify-between items-start mb-1">
+            <span id="tooltip-title" class="font-bold text-sky-400 font-serif text-sm">Void Cauldron Peak</span>
+            <button id="close-tooltip" class="text-gray-500">✕</button>
+          </div>
+          <p id="tooltip-desc" class="text-gray-300">The sacred pinnacle where ancient cultivators aligned heavenly star arrays.</p>
+        </div>
+      </main>
+
+      <!-- PANELS & CONTROLS -->
+      <aside id="panel-preferences" class="hidden fixed top-0 right-0 h-full w-80 z-50 bg-gray-950/95 border-l border-gray-800 p-6 font-sans">
+        <div class="flex justify-between pb-4 border-b border-gray-800 mb-4">
+          <h3 class="font-bold text-gray-100 font-serif">Aetherial Styles</h3>
+          <button id="btn-close-prefs" class="text-gray-400">✕</button>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-2">
+            <button class="font-btn active p-2 rounded bg-sky-950 border border-sky-500/50 text-sky-300 text-xs" data-font="serif">Noto Serif</button>
+            <button class="font-btn p-2 rounded bg-gray-900 border border-gray-800 text-gray-400 text-xs" data-font="sans">Rubik Sans</button>
+          </div>
+          <div class="space-y-1">
+            <span class="text-xs text-gray-400">Text Scale: <span id="val-font-size">100%</span></span>
+            <input id="slider-font-size" type="range" min="80" max="150" value="100" class="w-full">
+          </div>
+          <div class="space-y-1">
+            <span class="text-xs text-gray-400">Line Spacing: <span id="val-line-height">1.65</span></span>
+            <input id="slider-line-height" type="range" min="130" max="220" value="165" class="w-full">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="theme-btn active p-2 rounded bg-gray-950 text-sky-300 text-xs" data-theme="night">Night Void</button>
+            <button class="theme-btn p-2 rounded bg-emerald-950 text-emerald-200 text-xs" data-theme="jade">Jade Realm</button>
+          </div>
+        </div>
+      </aside>
+
+      <aside id="panel-bookmarks" class="hidden fixed top-0 right-0 h-full w-80 z-50 bg-gray-950/95 border-l border-gray-800 p-6 font-sans">
+        <div class="flex justify-between pb-4 border-b border-gray-800 mb-4">
+          <h3 class="font-bold text-gray-100 font-serif">Chronicle Anchors</h3>
+          <button id="btn-close-bookmarks" class="text-gray-400">✕</button>
+        </div>
+        <button id="btn-add-quick-bm" class="w-full mb-4 py-2 bg-sky-600 text-white rounded text-xs">Anchor Position</button>
+        <div id="bookmarks-list" class="space-y-2"></div>
+      </aside>
+
+      <div id="popover-immersion" class="hidden fixed bottom-20 left-4 z-50 w-80 p-4 bg-gray-950/95 border border-sky-500/30 rounded-xl font-sans">
+        <div class="flex justify-between border-b border-gray-800 pb-2 mb-3">
+          <span class="font-bold text-gray-200 text-xs">Immersion Settings</span>
+          <button id="close-immersion" class="text-gray-400">✕</button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <button id="toggle-auto-scroll" class="w-full text-left p-2 rounded bg-gray-900 text-gray-300">Auto Scroll Flow</button>
+          <button id="toggle-image-popups" class="w-full text-left p-2 rounded bg-gray-900 text-gray-300">Holographic Visions</button>
+          <div id="audio-menu" class="space-y-2 pt-2 border-t border-gray-800">
+            <select id="narrator-voice" class="w-full bg-gray-900 border border-gray-800 p-1 text-xs rounded"><option value="sage">Celestial Elder</option></select>
+            <select id="dialogue-voice" class="w-full bg-gray-900 border border-gray-800 p-1 text-xs rounded"><option value="sync">Character Sync</option></select>
+            <select id="side-voice" class="hidden"><option value="default">Default</option></select>
+            <div class="flex justify-between pt-1">
+              <button id="btn-speech-rate" class="p-1 bg-gray-900 text-sky-400 rounded text-[10px]">Speed: 1.0x</button>
+              <button id="btn-export-text" class="p-1 bg-gray-900 text-gray-300 rounded text-[10px]">Export Chapter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer id="reader-controls" class="w-full bg-gray-950/90 border-t border-gray-800/80 p-3 rounded-2xl font-sans">
+        <div class="mobile-controls flex sm:hidden items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <button id="btn-immersion" class="p-2 rounded bg-gray-900 text-gray-300">⚙️</button>
+            <button id="btn-codex" class="p-2 rounded bg-gray-900 text-sky-400">📜</button>
+          </div>
+          <div id="sap-playback-container">
+            <button id="btn-sap-playback" class="p-2 bg-sky-950 rounded-full">
+              <div id="vinyl-disc" class="vinyl-disc w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center">
+                <span id="icon-play" class="text-white text-[10px]">▶</span>
+                <span id="icon-pause" class="text-white text-[10px] hidden">⏸</span>
+              </div>
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-alter-fate" class="p-2 rounded bg-amber-500/10 text-amber-300">⚡</button>
+            <div id="chapter-navigation" class="flex items-center bg-gray-900 rounded p-1">
+              <button id="btn-prev-chapter" class="px-1 text-gray-400">◀</button>
+              <span id="chapter-progress" class="text-[10px] text-gray-400">42/100</span>
+              <button id="btn-next-chapter" class="px-1 text-gray-400">▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="desktop-controls hidden sm:flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button id="btn-immersion-desktop" class="px-3 py-1.5 rounded bg-gray-900 text-xs text-gray-300">⚙️ Immersion Settings</button>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="btn-alter-fate-desktop" class="px-3 py-1.5 rounded bg-amber-500/10 text-amber-300 text-xs">⚡ Alter Fate</button>
+            <div id="chapter-nav-desktop" class="flex items-center bg-gray-900 rounded p-1 text-xs">
+              <button id="btn-prev-chapter-desktop" class="px-2 text-gray-300">← Prev</button>
+              <button id="btn-codex-desktop" class="px-2 text-sky-400 border-x border-gray-800">Living Codex</button>
+              <button id="btn-next-chapter-desktop" class="px-2 text-gray-300">Next →</button>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+    <!-- LIVING CODEX SURFACE SECTION (#face-family-codex-wrapper) -->
+    <section id="face-family-codex-wrapper" class="rounded-3xl border border-sky-500/20 bg-gray-950/60 p-4 md:p-6 shadow-2xl relative font-sans">
+      <div class="flex items-center justify-between border-b border-sky-500/20 pb-3 mb-6">
+        <span class="text-xs font-bold uppercase tracking-widest text-sky-400 flex items-center gap-2">
+          📜 Living Codex Lore Surface
+        </span>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-sky-950 border border-sky-500/30 text-sky-300">Coordinated Face DNA</span>
+      </div>
+
+      <div id="living-codex-container" class="codex-premium-shell space-y-6">
+        <header id="codex-header" class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-gray-900 via-sky-950/40 to-gray-900 border border-sky-500/30">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-950 border border-sky-500/40 flex items-center justify-center text-sky-400 text-xl font-serif">📜</div>
+            <div>
+              <span id="codex-realm-badge" class="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/30 text-sky-300">Nine Heavens Realm</span>
+              <h1 id="codex-title" class="text-lg font-bold font-serif text-gray-100">Living Codex — Divine Registry</h1>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-gray-950/80 p-2 rounded-xl border border-gray-800">
+            <div class="flex flex-col text-right">
+              <span class="text-xs font-semibold text-gray-200">Deep Memory Access</span>
+              <span class="text-[10px] text-amber-400">4 Dormant Entries</span>
+            </div>
+            <button id="toggle-deep-memory" class="w-11 h-6 bg-gray-800 rounded-full p-1 relative transition-colors" aria-checked="false">
+              <span id="deep-memory-knob" class="block w-4 h-4 bg-gray-400 rounded-full transition-transform"></span>
+            </button>
+          </div>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-6">
+          <nav id="codex-side-nav" class="w-full md:w-56 flex-shrink-0">
+            <div id="codex-tab-scroller" class="flex flex-row md:flex-col overflow-x-auto gap-2 p-1.5 bg-gray-900/80 rounded-2xl border border-gray-800">
+              <button class="codex-tab active whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="portraits"><span>🎨</span> Portraits & Chronicle</button>
+              <button class="codex-tab whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="karma"><span>☯️</span> Karma & Relations</button>
+              <button class="codex-tab whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="power"><span>⚡</span> Power Rankings</button>
+              <button class="codex-tab whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="artifacts"><span>🗡️</span> Artifacts & Treasures</button>
+              <button class="codex-tab whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="fate"><span>🌌</span> Fate & World Molding</button>
+              <button class="codex-tab whitespace-nowrap px-3 py-2.5 rounded-xl text-left text-xs text-gray-300 flex items-center gap-2" data-tab="lore"><span>📚</span> Lore & Glossary</button>
+              <a id="btn-back-reader" href="#reader" class="hidden md:flex items-center gap-2 mt-2 px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-xs text-sky-400">← Reader Chamber</a>
+            </div>
+          </nav>
+
+          <main id="codex-content-area" class="flex-1 bg-gray-900/60 rounded-2xl border border-gray-800 p-5">
+            <section id="sec-portraits" class="space-y-6">
+              <div id="codex-collage" class="p-4 rounded-xl bg-gray-950/80 border border-sky-500/20 space-y-2">
+                <h3 class="text-xs font-bold font-serif text-sky-400 uppercase">Chronicle Collage</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div class="h-20 rounded-lg bg-cover bg-center border border-gray-800" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop')"></div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <h3 class="text-xs font-bold font-serif text-gray-200 uppercase">Primary Cultivators</h3>
+                <div id="codex-characters" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="entry-card p-3 rounded-xl bg-gray-950 border border-gray-800 flex gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-sky-950 border border-sky-500/30 flex items-center justify-center text-lg">⚔️</div>
+                    <div>
+                      <h4 class="font-bold text-gray-100 text-xs font-serif">Xiao Chen</h4>
+                      <p class="text-[11px] text-gray-400 mt-0.5">Master of the Nine Heavens Sword Assembly.</p>
+                    </div>
+                  </div>
+                  <div class="entry-card hidden p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 flex gap-3" data-dormant="true">
+                    <div class="w-12 h-12 rounded-xl bg-amber-950 flex items-center justify-center text-lg">👁️</div>
+                    <div><h4 class="font-bold text-amber-200 text-xs font-serif">Ancient Monarch Void</h4></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="codex-factions" class="p-3 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-300">Azure Lotus Faction • Void Cauldron Sect</div>
+              <div id="codex-timeline" class="p-3 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-300">Year 10,400: Alignment of Nine Stars</div>
+            </section>
+
+            <section id="sec-karma" class="hidden space-y-4">
+              <div id="codex-relations" class="p-3 rounded-xl bg-gray-950 border border-purple-500/30 text-xs text-gray-300">Karmic Bond: 94% Alignment</div>
+              <div id="codex-mysteries" class="p-3 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-400">Mystery of Shattered Blade</div>
+            </section>
+
+            <section id="sec-power" class="hidden space-y-4">
+              <div id="codex-power-hierarchy" class="p-3 rounded-xl bg-gray-950 border border-sky-500/30 text-xs text-sky-300">Foundation Establishment Peak</div>
+              <div id="codex-dashboards" class="p-3 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-400">Qi Resonator Dashboard</div>
+            </section>
+
+            <section id="sec-artifacts" class="hidden space-y-4">
+              <div id="codex-artifacts-grid" class="p-3 rounded-xl bg-gray-950 border border-amber-500/30 text-xs text-amber-200">Ice Phoenix Sword</div>
+            </section>
+
+            <section id="sec-fate" class="hidden space-y-4">
+              <div id="codex-fate-panel" class="p-3 rounded-xl bg-gray-950 border border-sky-500/30 text-xs text-sky-300">Karmic Branching System</div>
+            </section>
+
+            <section id="sec-lore" class="hidden space-y-4">
+              <div id="codex-glossary" class="p-3 rounded-xl bg-gray-950 border border-gray-800 text-xs text-gray-300">Nine Heavens Realm Law</div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Face Family Top Tab Navigation
+    const btnSplit = document.getElementById('btn-view-split');
+    const btnReader = document.getElementById('btn-view-reader');
+    const btnCodex = document.getElementById('btn-view-codex');
+    const readerWrap = document.getElementById('face-family-reader-wrapper');
+    const codexWrap = document.getElementById('face-family-codex-wrapper');
+
+    function setViewMode(mode) {
+      btnSplit?.classList.remove('active');
+      btnReader?.classList.remove('active');
+      btnCodex?.classList.remove('active');
+
+      if (mode === 'split') {
+        btnSplit?.classList.add('active');
+        readerWrap?.classList.remove('hidden');
+        codexWrap?.classList.remove('hidden');
+      } else if (mode === 'reader') {
+        btnReader?.classList.add('active');
+        readerWrap?.classList.remove('hidden');
+        codexWrap?.classList.add('hidden');
+      } else if (mode === 'codex') {
+        btnCodex?.classList.add('active');
+        readerWrap?.classList.add('hidden');
+        codexWrap?.classList.remove('hidden');
+      }
+    }
+
+    btnSplit?.addEventListener('click', () => setViewMode('split'));
+    btnReader?.addEventListener('click', () => setViewMode('reader'));
+    btnCodex?.addEventListener('click', () => setViewMode('codex'));
+
+    // Living Codex Tab Switching
+    const tabs = document.querySelectorAll('.codex-tab');
+    const sections = {
+      portraits: document.getElementById('sec-portraits'),
+      karma: document.getElementById('sec-karma'),
+      power: document.getElementById('sec-power'),
+      artifacts: document.getElementById('sec-artifacts'),
+      fate: document.getElementById('sec-fate'),
+      lore: document.getElementById('sec-lore')
+    };
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        Object.keys(sections).forEach(key => {
+          if (sections[key]) {
+            if (key === target) sections[key].classList.remove('hidden');
+            else sections[key].classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Deep Memory Toggle
+    const btnToggleDeep = document.getElementById('toggle-deep-memory');
+    const knobDeep = document.getElementById('deep-memory-knob');
+    let isDeepActive = false;
+
+    btnToggleDeep?.addEventListener('click', () => {
+      isDeepActive = !isDeepActive;
+      btnToggleDeep.setAttribute('aria-checked', isDeepActive ? 'true' : 'false');
+      if (isDeepActive) {
+        knobDeep?.classList.add('translate-x-5', 'bg-sky-400');
+        document.querySelectorAll('[data-dormant="true"]').forEach(el => el.classList.remove('hidden'));
+      } else {
+        knobDeep?.classList.remove('translate-x-5', 'bg-sky-400');
+        document.querySelectorAll('[data-dormant="true"]').forEach(el => el.classList.add('hidden'));
+      }
+    });
+  </script>
+</body>
+</html>`;
+
 export const FIXED_FACE_TEMPLATES: Record<string, FaceTemplateContract> = {
   reader_chamber: {
     id: 'reader_chamber',
@@ -932,11 +1396,41 @@ export const FIXED_FACE_TEMPLATES: Record<string, FaceTemplateContract> = {
       }
     ],
     html: LIVING_CODEX_TEMPLATE_HTML
+  },
+  face_family: {
+    id: 'face_family',
+    name: 'Face Family',
+    presetId: 'face_family',
+    description: 'Fixed structural template for a coordinated Face Family (Reader Chamber + Living Codex).',
+    sections: [
+      {
+        id: 'family_header',
+        name: 'Face Family Header Navigation',
+        description: 'Top Face Family navigation toolbar with view mode switcher.',
+        requiredElements: ['#face-family-nav', '#btn-view-split', '#btn-view-reader', '#btn-view-codex']
+      },
+      {
+        id: 'reader_surface',
+        name: 'Reader Chamber Surface',
+        description: 'Coordinated Reader Chamber surface with header, viewport, preferences, bookmarks, immersion popover, and bottom controls.',
+        requiredElements: ['#face-family-reader-wrapper', '#reader-header', '#story-title', '#chapter-title', '#reader-viewport', '#chapter-hero', '.reader-prose', '#panel-preferences', '#panel-bookmarks', '#popover-immersion', '#reader-controls']
+      },
+      {
+        id: 'codex_surface',
+        name: 'Living Codex Surface',
+        description: 'Coordinated Living Codex surface with shell header, tab scroller, and content area.',
+        requiredElements: ['#face-family-codex-wrapper', '#living-codex-container', '#codex-header', '#codex-title', '#codex-side-nav', '#codex-tab-scroller', '#codex-content-area', '#sec-portraits']
+      }
+    ],
+    html: FACE_FAMILY_TEMPLATE_HTML
   }
 };
 
 export function getTemplateForPreset(presetIdOrLabel: string): FaceTemplateContract {
   const normalized = (presetIdOrLabel || '').toLowerCase().replace(/[\s_]+/g, '_');
+  if (normalized.includes('family') || normalized.includes('face_family')) {
+    return FIXED_FACE_TEMPLATES.face_family;
+  }
   if (normalized.includes('codex')) {
     return FIXED_FACE_TEMPLATES.living_codex;
   }

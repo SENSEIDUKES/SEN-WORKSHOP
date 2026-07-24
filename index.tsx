@@ -25,6 +25,8 @@ import InfoDrawer from './components/InfoDrawer';
 import { saveComponent, SavedComponent } from './services/dbService';
 import { getThumbnailId, thumbnailCache } from './hooks/useThumbnail';
 import { useLanguage, LANGUAGE_NAMES, Language } from './localization';
+import { buildDnaPrompt } from './dnaUtils';
+import { extractDominantColor } from './utils';
 import { 
     SettingsIcon,
     SparklesIcon, 
@@ -41,24 +43,22 @@ function App() {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [placeholders, setPlaceholders] = useState<string[]>(INITIAL_PLACEHOLDERS);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
-  const [activeSkin, setActiveSkin] = useState<AppSkin>(APP_SKINS[0]);
-  
+  const [activeSkin, setActiveSkin] = useState<AppSkin>(() => {
+    try {
+      const savedSkinId = localStorage.getItem('sen_active_skin_id');
+      const found = APP_SKINS.find(s => s.id === savedSkinId);
+      return found || APP_SKINS[0];
+    } catch {
+      return APP_SKINS[0];
+    }
+  });
+
   const [drawerState, setDrawerState] = useState<{
       isOpen: boolean;
       mode: 'code' | 'variations' | 'export' | 'preview' | 'playground' | null;
       title: string;
       data: any; 
   }>({ isOpen: false, mode: null, title: '', data: null });
-
-  const [isDualMode, setIsDualMode] = useState<boolean>(() => {
-      return localStorage.getItem('sea_is_dual_mode') === 'true';
-  });
-
-  const toggleDualMode = () => {
-      const newVal = !isDualMode;
-      setIsDualMode(newVal);
-      localStorage.setItem('sea_is_dual_mode', newVal.toString());
-  };
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
@@ -84,6 +84,11 @@ function App() {
           const newDna: Record<string, number> = {};
           skin.dnaDimensions.forEach(dim => newDna[dim.key] = dim.defaultWeight);
           setStyleDna(newDna);
+          try {
+              localStorage.setItem('sen_active_skin_id', skin.id);
+          } catch (e) {
+              console.warn("Failed to persist skin ID", e);
+          }
       }
   };
 
@@ -107,6 +112,14 @@ function App() {
     prevItem
   } = useGenerativeSessions(activeSkin);
 
+  const currentSession = sessions[currentSessionIndex];
+  const activeArtifact = currentSession?.artifacts?.[focusedArtifactIndex ?? 0] || currentSession?.artifacts?.[0];
+  const activeColor = extractDominantColor(
+    activeArtifact?.html,
+    currentSession?.prompt,
+    activeArtifact?.styleName || currentSession?.componentType
+  );
+
   const {
     isDictating,
     toggleDictation,
@@ -114,13 +127,8 @@ function App() {
   } = useSpeechRecognition({ inputValue, setInputValue });
 
   const getDnaPrompt = useCallback(() => {
-    return activeSkin.dnaDimensions.map(dim => {
-        const val = styleDna[dim.key] ?? dim.defaultWeight;
-        if (val < 30) return dim.low;
-        if (val > 70) return dim.high;
-        return `Balanced ${dim.low}/${dim.high}`;
-    }).join(', ');
-  }, [styleDna, activeSkin]);
+    return buildDnaPrompt(styleDna);
+  }, [styleDna]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -213,7 +221,7 @@ function App() {
           try {
               const settings = getSettings();
               const response = await generateContent(
-                  `Generate 20 creative, short visual face prompts for the SEN Light Novels app (specifically complete faces for either the Reader Chamber reading layout or the Living Codex lore encyclopedia). Return ONLY a raw JSON array of strings. IP SAFEGUARD: Avoid referencing specific trademarked characters or brands. Return ONLY the JSON raw array string.`,
+                  `Generate 20 creative, short visual face prompts for the SEN Light Novels app (specifically complete faces for the Reader Chamber reading layout, Living Codex lore encyclopedia, or coordinated Face Family). Return ONLY a raw JSON array of strings. IP SAFEGUARD: Avoid referencing specific trademarked characters or brands. Return ONLY the JSON raw array string.`,
                   settings
               );
               const text = response.text || '[]';
@@ -302,10 +310,12 @@ function App() {
         setReferenceImage(null);
     }
 
+    const isFamily = selectedPreset.id === 'face_family' || selectedPreset.label === 'Face Family';
+
     const options = {
       componentType: selectedPreset.label,
       componentInstruction: selectedPreset.instruction,
-      isDualMode,
+      mode: isFamily ? ('family' as const) : ('single' as const),
       showStyleDna,
       styleDnaPrompt: getDnaPrompt(),
       referenceImage: referenceImage || undefined
@@ -314,7 +324,7 @@ function App() {
     await runSendMessage(trimmedInput, options, () => {
         setTimeout(() => inputRef.current?.focus(), 100);
     });
-  }, [inputValue, isLoading, isDualMode, showStyleDna, getDnaPrompt, selectedPreset, runSendMessage, stopDictation]);
+  }, [inputValue, isLoading, showStyleDna, getDnaPrompt, selectedPreset, runSendMessage, stopDictation]);
 
   const handleSurpriseMe = () => {
       const currentPrompt = placeholders[placeholderIndex];
@@ -335,7 +345,6 @@ function App() {
   const isLoadingDrawer = isLoading && drawerState.mode === 'variations' && componentVariations.length === 0;
 
   const hasStarted = sessions.length > 0 || isLoading;
-  const currentSession = sessions[currentSessionIndex];
 
   let canGoBack = false;
   let canGoForward = false;
@@ -406,6 +415,8 @@ function App() {
                 setIsSettingsOpen(false);
                 setIsInfoOpen(true);
             }} 
+            activeSkin={activeSkin}
+            onSkinChange={handleSkinChange}
         />
         <LibraryDrawer 
             isOpen={isLibraryOpen} 
@@ -425,43 +436,78 @@ function App() {
             onClose={() => setIsInfoOpen(false)} 
         />
         
-        <div style={{ position: 'fixed', top: '24px', left: '24px', zIndex: 100 }}>
-            <div style={{
-                background: 'rgba(0, 0, 0, 0.4)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '8px',
-                padding: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-            }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Active Skin
-                </span>
-                <select
-                    value={activeSkin.id}
-                    onChange={(e) => handleSkinChange(e.target.value)}
+        {/* Top Left Header Brand & Logo with Interactive Ambient Glow Sync */}
+        <div className="app-header-brand" onClick={() => setIsInfoOpen(true)} title={`SEN Workshop - Celestial Library (${activeColor.name})`} style={{
+            position: 'fixed',
+            top: '20px',
+            left: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            zIndex: 101,
+            background: 'rgba(9, 9, 11, 0.82)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: `1px solid rgba(${activeColor.rgb}, 0.35)`,
+            padding: '6px 16px 6px 8px',
+            borderRadius: '999px',
+            boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), 0 0 24px rgba(${activeColor.rgb}, 0.22)`,
+            cursor: 'pointer',
+            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img 
+                    src="https://pub-e482c2dbbb984c3c87ecdd8ae3a92183.r2.dev/LIBRARY/images/CELESTIAL%20LIBRARY%20ICON.jpg" 
+                    alt="SEN Workshop Logo" 
+                    referrerPolicy="no-referrer"
                     style={{
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: 'var(--text-color)',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        outline: 'none',
-                        cursor: 'pointer'
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: `1.5px solid rgba(${activeColor.rgb}, 0.6)`,
+                        boxShadow: `0 0 16px rgba(${activeColor.rgb}, 0.55), 0 0 32px rgba(${activeColor.rgb}, 0.3)`,
+                        transition: 'all 0.4s ease-in-out',
+                        flexShrink: 0
                     }}
-                >
-                    {APP_SKINS.map(skin => (
-                        <option key={skin.id} value={skin.id} style={{ background: '#111', color: '#fff' }}>
-                            {skin.name}
-                        </option>
-                    ))}
-                </select>
+                />
+                <span style={{
+                    position: 'absolute',
+                    bottom: '-1px',
+                    right: '-1px',
+                    width: '9px',
+                    height: '9px',
+                    borderRadius: '50%',
+                    backgroundColor: activeColor.hex,
+                    border: '1.5px solid #09090b',
+                    boxShadow: `0 0 8px ${activeColor.hex}`,
+                    transition: 'background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out'
+                }} title={`Glow Sync: ${activeColor.name}`} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+                <span style={{
+                    fontFamily: "'Alegreya SC', 'Alegreya', serif",
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    color: '#FAFAFA',
+                    lineHeight: 1.2
+                }}>
+                    {t('app_title')}
+                </span>
+                <span style={{
+                    fontSize: '10px',
+                    fontFamily: 'Inter, sans-serif',
+                    color: `rgba(${activeColor.rgb}, 0.9)`,
+                    fontWeight: 600,
+                    letterSpacing: '0.03em',
+                    transition: 'color 0.4s ease-in-out'
+                }}>
+                    Celestial Library
+                </span>
             </div>
         </div>
-        
+
         <div style={{ position: 'fixed', top: '24px', right: '24px', display: 'flex', gap: '12px', zIndex: 100 }}>
             <button className="settings-button" style={{ position: 'relative', top: 'auto', right: 'auto' }} onClick={() => setIsLibraryOpen(true)} title={t('library_title')}>
                 <LibraryIcon />
@@ -497,9 +543,6 @@ function App() {
                      <div className="empty-content">
                          <h1>{t('app_title')}</h1>
                          <p>{t('app_sub')}</p>
-                         <button className={`surprise-button ${isDualMode ? 'active' : ''}`} onClick={toggleDualMode} disabled={isLoading}>
-                             <SparklesIcon /> {isDualMode ? t('dual_mode_on') : t('dual_mode_off')}
-                         </button>
                      </div>
                  </div>
 
@@ -509,8 +552,6 @@ function App() {
                     else if (sIndex < currentSessionIndex) positionClass = 'past-session';
                     else if (sIndex > currentSessionIndex) positionClass = 'future-session';
                     
-                    const canFuse = isDualMode && session.artifacts.length === 2 && sIndex === currentSessionIndex && !isLoading;
-
                     return (
                         <div key={session.id} className={`session-group ${positionClass}`}>
                             <div className="artifact-grid" ref={sIndex === currentSessionIndex ? gridScrollRef : null}>
@@ -533,47 +574,6 @@ function App() {
                                     );
                                 })}
                             </div>
-                            {canFuse && focusedArtifactIndex === null && (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '32px', position: 'relative', zIndex: 10, gap: '16px' }}>
-                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                                        — Fusion Modes —
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '800px' }}>
-                                        <button 
-                                           className="surprise-button" 
-                                           onClick={() => handleFuse('Best Of')}
-                                           style={{ background: 'var(--primary-color)', color: '#000', border: 'none', padding: '12px 20px', fontSize: '14px', cursor: 'pointer' }}
-                                           title="Combine strongest pieces from both"
-                                        >
-                                            <SparklesIcon /> Best Of
-                                        </button>
-                                        <button 
-                                           className="surprise-button" 
-                                           onClick={() => handleFuse('A Look + B Structure')}
-                                           style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', padding: '12px 20px', fontSize: '14px', cursor: 'pointer' }}
-                                           title="Use A's visual style, B's layout"
-                                        >
-                                            <SparklesIcon /> A Look + B Structure
-                                        </button>
-                                        <button 
-                                           className="surprise-button" 
-                                           onClick={() => handleFuse('B Look + A Structure')}
-                                           style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', padding: '12px 20px', fontSize: '14px', cursor: 'pointer' }}
-                                            title="Use B's visual style, A's layout"
-                                        >
-                                            <SparklesIcon /> B Look + A Structure
-                                        </button>
-                                        <button 
-                                           className="surprise-button" 
-                                           onClick={() => handleFuse('Cleaner / Production')}
-                                           style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', padding: '12px 20px', fontSize: '14px', cursor: 'pointer' }}
-                                           title="Simplify messy generated UI"
-                                        >
-                                            <SparklesIcon /> Cleaner / Production
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     );
                 })}

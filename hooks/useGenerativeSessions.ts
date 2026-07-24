@@ -8,7 +8,8 @@ import { validateTemplateContract } from '../templates';
 export interface GenerateOptions {
   componentType: string;
   componentInstruction: string;
-  isDualMode: boolean;
+  isDualMode?: boolean;
+  mode?: 'single' | 'family';
   showStyleDna: boolean;
   styleDnaPrompt: string;
   referenceImage?: string;
@@ -160,9 +161,12 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
     const baseTime = Date.now();
     const sessionId = generateId();
 
-    const placeholderArtifacts: Artifact[] = Array(options.isDualMode ? 2 : 3).fill(null).map((_, i) => ({
+    const isFamilyMode = options.mode === 'family' || options.componentType === 'Face Family' || options.componentType === 'face_family';
+    const isDual = options.isDualMode && !isFamilyMode;
+
+    const placeholderArtifacts: Artifact[] = Array(isDual ? 2 : 3).fill(null).map((_, i) => ({
       id: `${sessionId}_${i}`,
-      styleName: 'Designing...',
+      styleName: isFamilyMode ? `Family Direction ${i + 1}` : 'Designing...',
       html: '',
       status: 'streaming' as const,
     }));
@@ -182,7 +186,7 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
 
     try {
       const settings = getSettings();
-      const dnaContext = options.showStyleDna ? `\n**STYLE DNA (User Selected Aesthetics):**\n${options.styleDnaPrompt}\n` : '';
+      const dnaContext = (options.styleDnaPrompt && options.styleDnaPrompt.trim()) ? `\n**STYLE DNA (User Selected Aesthetics):**\n${options.styleDnaPrompt}\n` : '';
 
       const stylePrompt = getStylePrompt(trimmedInput, options.componentType, dnaContext, activeSkin);
 
@@ -202,9 +206,9 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
 
       if (!generatedStyles || !Array.isArray(generatedStyles) || generatedStyles.length < (options.isDualMode ? 2 : 3)) {
         generatedStyles = [
-          "Primary Pigment Gridwork",
-          "Tactile Risograph Layering",
-          "Kinetic Silhouette Balance"
+          "Obsidian Void & Gold: High-contrast deep dark obsidian canvas paired with warm glowing gold typography, frosted glass card surfaces, refined hairline borders, elevated card depth, and polished touch controls with smooth amber hover states.",
+          "Ethereal Jade & Silk Scroll: Calming deep emerald jade atmosphere with silky parchment cards, elegant serif typography, subtle bamboo/silk borders, tactile card depth, and smooth responsive interaction states.",
+          "Celestial Starlight & Silver: Luminous deep indigo night-sky theme with silver filigree lines, modern high-contrast typography, translucent frosted panels, crisp controls, and subtle glowing motion effects on active elements."
         ];
       }
 
@@ -214,12 +218,16 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
         if (s.id !== sessionId) return s;
         return {
           ...s,
-          artifacts: s.artifacts.map((art, i) => ({
-            ...art,
-            styleName: options.isDualMode
-              ? (i === 0 ? getSettings().model : getSettingsB().model)
-              : generatedStyles[i]
-          }))
+          artifacts: s.artifacts.map((art, i) => {
+            const fullDir = generatedStyles[i] || `Direction ${i + 1}`;
+            const shortTag = fullDir.split(':')[0].split('—')[0].trim();
+            return {
+              ...art,
+              styleName: isDual
+                ? (i === 0 ? getSettings().model : getSettingsB().model)
+                : (shortTag || fullDir.slice(0, 30))
+            };
+          })
         };
       }));
 
@@ -290,8 +298,8 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       };
 
       await Promise.all(placeholderArtifacts.map((art, i) => {
-        const activeSettings = (options.isDualMode && i === 1) ? getSettingsB() : settings;
-        const styleInst = options.isDualMode ? generatedStyles[0] : generatedStyles[i];
+        const activeSettings = (isDual && i === 1) ? getSettingsB() : settings;
+        const styleInst = isDual ? generatedStyles[0] : generatedStyles[i];
         return generateArtifact(art, styleInst, activeSettings);
       }));
 

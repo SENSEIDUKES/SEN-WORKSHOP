@@ -1,7 +1,9 @@
 {
   "name": "SEN Workshop",
   "description": "Visual faces generator for Celestial Library (Reader Chamber, Living Codex)",
-  "requestFramePermissions": [],
+  "requestFramePermissions": [
+    "microphone"
+  ],
   "prompt": "",
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
