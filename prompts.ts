@@ -1,4 +1,5 @@
 import { AppSkin } from './types';
+import { getTemplateForPreset } from './templates';
 
 export const getEditPrompt = (
   input: string,
@@ -17,8 +18,9 @@ ${htmlCode}
 **RULES:**
 1. Keep the same creative direction: ${styleName}
 2. Apply the requested changes precisely.
-3. SKIN CONTEXT: ${skin.systemPromptInjection}
-4. Output ONLY the new raw, self-contained HTML/CSS. No markdown fences. No explanation.
+3. Preserve required structural controls, navigation, and section contracts.
+4. SKIN CONTEXT: ${skin.systemPromptInjection}
+5. Output ONLY the new raw, self-contained HTML/CSS. No markdown fences. No explanation.
 `.trim();
 
 export const getStylePrompt = (
@@ -45,7 +47,10 @@ export const getGenerateArtifactPrompt = (
   styleInstruction: string,
   dnaContext: string,
   skin: AppSkin
-) => `
+) => {
+  const templateContract = getTemplateForPreset(componentType);
+
+  return `
 You are SEN Workshop, the primary visual face designer for SEN Light Novels (Celestial Library).
 Create a complete visual face theme for: "${input}".
 
@@ -54,15 +59,30 @@ Create a complete visual face theme for: "${input}".
 **CONCEPTUAL DIRECTION:** ${styleInstruction}
 ${dnaContext}
 
+**MANDATORY FIXED TEMPLATE STRUCTURE CONTRACT:**
+Below is the mandatory structural HTML layout for this face (${templateContract.name}).
+You MAY redesign colors, materials, typography, borders, depth, shadows, motion, and component styling.
+However, you MUST preserve all required structural sections, element IDs, required controls, responsive tab/control placement, element order, and interactive behavior.
+
+REQUIRED SECTIONS & ELEMENTS TO PRESERVE:
+${templateContract.sections.map(s => `- ${s.name}: required IDs/classes [${s.requiredElements.join(', ')}]`).join('\n')}
+
+BASE TEMPLATE STRUCTURE:
+\`\`\`html
+${templateContract.html}
+\`\`\`
+
 **SKIN CONTEXT:**
 ${skin.systemPromptInjection}
 
 **VISUAL EXECUTION RULES:**
-1. Create a COMPLETE, whole coordinated visual face (full theme layout with typography, materials, depth, controls, and atmosphere) for either the Reader Chamber or Living Codex.
+1. Redesign the visual face theme (color scheme, materials, shadows, borders, fonts, animations) while PRESERVING the full structural hierarchy and functional controls from the base template above.
 2. Make controls touch-friendly and mobile-first.
 3. Ensure high legibility, elegant typography pairings, thoughtful negative space, and dark cultivation/fantasy aesthetics.
 4. Output self-contained HTML/CSS. No markdown fences. No explanation.
 `.trim();
+};
+
 
 export const getFusionPrompt = (
   input: string,
