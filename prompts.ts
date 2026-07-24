@@ -5,23 +5,35 @@ export const getEditPrompt = (
   input: string,
   htmlCode: string,
   styleName: string,
-  skin: AppSkin
-) => `
+  skin: AppSkin,
+  componentType: string = 'Reader Chamber'
+) => {
+  const templateContract = getTemplateForPreset(componentType);
+
+  return `
 You are SEN Workshop, an expert UI designer for the SEN Light Novels Celestial Library.
 Your task is to modify the provided visual face based on this request: "${input}"
+
+Target Face Preset: ${componentType}
+Style Direction: ${styleName}
 
 Current HTML:
 \`\`\`html
 ${htmlCode}
 \`\`\`
 
+**MANDATORY TEMPLATE CONTRACT:**
+You MUST preserve all required structural sections and mandatory element IDs/classes:
+${templateContract.sections.map(s => `- ${s.name}: [${s.requiredElements.join(', ')}]`).join('\n')}
+
 **RULES:**
 1. Keep the same creative direction: ${styleName}
-2. Apply the requested changes precisely.
-3. Preserve required structural controls, navigation, and section contracts.
+2. Apply the requested changes precisely to colors, materials, typography, borders, shadows, and spacing.
+3. NEVER remove required structural controls, navigation, chapter buttons, audio controls, or section contracts listed above.
 4. SKIN CONTEXT: ${skin.systemPromptInjection}
 5. Output ONLY the new raw, self-contained HTML/CSS. No markdown fences. No explanation.
 `.trim();
+};
 
 export const getStylePrompt = (
   input: string,
@@ -83,7 +95,6 @@ ${skin.systemPromptInjection}
 `.trim();
 };
 
-
 export const getFusionPrompt = (
   input: string,
   componentType: string,
@@ -91,7 +102,10 @@ export const getFusionPrompt = (
   htmlB: string,
   fusionMode: string = 'Best Of',
   skin: AppSkin
-) => `
+) => {
+  const templateContract = getTemplateForPreset(componentType);
+
+  return `
 You are SEN Workshop, an expert UI designer for SEN Light Novels.
 Your task is to review two different visual face implementations for the following request and fuse them into a single Master Visual Face.
 
@@ -109,6 +123,10 @@ ${htmlA}
 ${htmlB}
 \`\`\`
 
+**MANDATORY TEMPLATE CONTRACT:**
+You MUST preserve all required structural sections and mandatory element IDs/classes:
+${templateContract.sections.map(s => `- ${s.name}: [${s.requiredElements.join(', ')}]`).join('\n')}
+
 **RULES FOR FUSION MODE: ${fusionMode}**
 ${fusionMode === 'Best Of' ? 'Combine the strongest functional and visual setup pieces from both Implementation A and Implementation B.' : ''}
 ${fusionMode === 'A Look + B Structure' ? 'Apply the visual style, colors, and textures of Implementation A onto the structural layout and elements of Implementation B.' : ''}
@@ -117,20 +135,27 @@ ${fusionMode === 'Cleaner / Production' ? 'Simplify the combined designs. Remove
 
 **GENERAL RULES:**
 1. Ensure the final fused result is a single, cohesive, high-fidelity visual face theme.
-2. SKIN CONTEXT: ${skin.systemPromptInjection}
-3. Output ONLY the new raw, self-contained HTML/CSS. No markdown fences. No explanation.
+2. Preserve all mandatory controls, IDs, and section contracts listed above.
+3. SKIN CONTEXT: ${skin.systemPromptInjection}
+4. Output ONLY the new raw, self-contained HTML/CSS. No markdown fences. No explanation.
 `.trim();
+};
 
 export const getElementEditPrompt = (
   instruction: string,
   htmlCode: string,
   elementHtml: string,
   elementName: string,
-  skin: AppSkin
-) => `
+  skin: AppSkin,
+  componentType: string = 'Reader Chamber'
+) => {
+  const templateContract = getTemplateForPreset(componentType);
+
+  return `
 You are SEN Workshop, an expert UI designer for SEN Light Novels.
 Your task is to modify a SPECIFIC element within the provided visual face based on this request: "${instruction}"
 
+Face Target: ${componentType}
 Selected Element: ${elementName}
 Selected Element HTML Snapshot:
 \`\`\`html
@@ -142,12 +167,18 @@ Full Visual Face HTML:
 ${htmlCode}
 \`\`\`
 
+**MANDATORY TEMPLATE CONTRACT:**
+You MUST preserve all required structural sections and mandatory element IDs/classes in the full HTML:
+${templateContract.sections.map(s => `- ${s.name}: [${s.requiredElements.join(', ')}]`).join('\n')}
+
 **RULES:**
 1. Keep the same creative direction and layout, but apply the requested changes strictly to the selected element.
 2. If the user asks to modify the element, you MUST update the element in the context of the full visual face block.
-3. SKIN CONTEXT: ${skin.systemPromptInjection}
-4. Output ONLY the new raw, self-contained FULL HTML/CSS for the entire visual face. No markdown fences. No explanation.
+3. Preserve all mandatory controls, IDs, and section contracts.
+4. SKIN CONTEXT: ${skin.systemPromptInjection}
+5. Output ONLY the new raw, self-contained FULL HTML/CSS for the entire visual face. No markdown fences. No explanation.
 `.trim();
+};
 
 export const getReactExportPrompt = (htmlCode: string, skin: AppSkin) => `
 You are an expert Frontend Engineer. Convert the following HTML/CSS visual face into a clean, modular React component.
@@ -189,10 +220,17 @@ export const getGenerateVariationsPrompt = (
   promptOriginal: string,
   componentType: string,
   skin: AppSkin
-) => `
+) => {
+  const templateContract = getTemplateForPreset(componentType);
+
+  return `
 Generate 3 RADICAL CONCEPTUAL VARIATIONS of: "${promptOriginal}".
 
 **FACE TARGET:** ${componentType || 'Reader Chamber'}
+
+**MANDATORY TEMPLATE CONTRACT:**
+You MUST preserve all required structural sections and mandatory element IDs/classes:
+${templateContract.sections.map(s => `- ${s.name}: [${s.requiredElements.join(', ')}]`).join('\n')}
 
 **SKIN CONTEXT:**
 ${skin.systemPromptInjection}
@@ -201,10 +239,11 @@ ${skin.systemPromptInjection}
 For EACH variation:
 - Invent a unique design direction name.
 - Rewrite the prompt to fully adopt that metaphor's visual language.
-- Generate high-fidelity HTML/CSS representing a complete visual face layout.
+- Generate high-fidelity HTML/CSS representing a complete visual face layout adhering strictly to the template contract above.
 - Make controls touch-friendly and mobile-first.
 - Output self-contained HTML/CSS.
 
 Required JSON Output Format (stream ONE object per line):
 \`{ "name": "Persona Name", "html": "..." }\`
 `.trim();
+};

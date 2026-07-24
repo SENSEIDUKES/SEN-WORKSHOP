@@ -3,6 +3,7 @@ import { Artifact, Session, ComponentVariation, ModelSettings, AppSkin } from '.
 import { generateId, extractHtmlFromMarkdown } from '../utils';
 import { generateContent, generateContentStream, getSettings, getSettingsB } from '../ai';
 import { getEditPrompt, getStylePrompt, getGenerateArtifactPrompt, getGenerateVariationsPrompt, getFusionPrompt, getElementEditPrompt } from '../prompts';
+import { validateTemplateContract } from '../templates';
 
 export interface GenerateOptions {
   componentType: string;
@@ -86,7 +87,13 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
 
       try {
         const settings = getSettings();
-        const editPrompt = getEditPrompt(trimmedInput, artifactToEdit.html, artifactToEdit.styleName, activeSkin);
+        const editPrompt = getEditPrompt(
+          trimmedInput,
+          artifactToEdit.html,
+          artifactToEdit.styleName,
+          activeSkin,
+          sessionToEdit.componentType || options.componentType
+        );
 
         const responseStream = await generateContentStream(editPrompt, settings);
 
@@ -107,6 +114,10 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
         }
 
         let finalHtml = extractHtmlFromMarkdown(accumulatedHtml);
+        const val = validateTemplateContract(finalHtml, sessionToEdit.componentType || options.componentType);
+        if (!val.valid) {
+          console.warn('[Contract Validation Warning] Edited face HTML missing required elements:', val.missingElements);
+        }
 
         setSessions(prev => prev.map(sess =>
           sess.id === sessionToEdit.id ? {
@@ -242,6 +253,10 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
           }
 
           let finalHtml = extractHtmlFromMarkdown(accumulatedHtml);
+          const val = validateTemplateContract(finalHtml, options.componentType);
+          if (!val.valid) {
+            console.warn('[Contract Validation Warning] Generated face HTML missing required elements:', val.missingElements);
+          }
 
           setSessions(prev => prev.map(sess =>
             sess.id === sessionId ? {
@@ -317,7 +332,7 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
 
       const prompt = getGenerateVariationsPrompt(
         currentSession.prompt,
-        currentSession.componentType || 'Freeform Component',
+        currentSession.componentType || 'Reader Chamber',
         activeSkin
       );
 
@@ -403,7 +418,7 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       const settings = getSettings();
       const prompt = getFusionPrompt(
         currentSession.prompt,
-        currentSession.componentType || 'Freeform Component',
+        currentSession.componentType || 'Reader Chamber',
         artA.html,
         artB.html,
         fusionMode,
@@ -427,6 +442,10 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       }
       
       let finalHtml = extractHtmlFromMarkdown(accumulatedHtml);
+      const val = validateTemplateContract(finalHtml, currentSession.componentType || 'Reader Chamber');
+      if (!val.valid) {
+        console.warn('[Contract Validation Warning] Fused face HTML missing required elements:', val.missingElements);
+      }
 
       setSessions(prev => prev.map((sess, i) => i === currentSessionIndex ? {
         ...sess,
@@ -480,7 +499,14 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
 
     try {
       const settings = getSettings();
-      const editPrompt = getElementEditPrompt(instruction, artifactToEdit.html, elementHtml, elementName, activeSkin);
+      const editPrompt = getElementEditPrompt(
+        instruction,
+        artifactToEdit.html,
+        elementHtml,
+        elementName,
+        activeSkin,
+        currentSession.componentType || 'Reader Chamber'
+      );
 
       const responseStream = await generateContentStream(editPrompt, settings);
 
@@ -501,6 +527,10 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       }
 
       let finalHtml = extractHtmlFromMarkdown(accumulatedHtml);
+      const val = validateTemplateContract(finalHtml, currentSession.componentType || 'Reader Chamber');
+      if (!val.valid) {
+        console.warn('[Contract Validation Warning] Element-edited face HTML missing required elements:', val.missingElements);
+      }
 
       setSessions(prev => prev.map(sess =>
         sess.id === currentSession.id ? {

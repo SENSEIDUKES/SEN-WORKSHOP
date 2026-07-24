@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { FIXED_FACE_TEMPLATES, getTemplateForPreset } from './templates';
+import { FIXED_FACE_TEMPLATES, getTemplateForPreset, validateTemplateContract } from './templates';
 import { getGenerateArtifactPrompt } from './prompts';
 import { DEFAULT_SEN_SKIN } from './constants';
 
@@ -15,26 +15,18 @@ describe('SEN Fixed Face Templates Structure & Contract', () => {
     expect(template).toBeDefined();
     expect(template.presetId).toBe('reader_chamber');
 
-    // Check all required structural sections exist
     const sectionIds = template.sections.map(s => s.id);
     expect(sectionIds).toContain('header');
     expect(sectionIds).toContain('viewport');
     expect(sectionIds).toContain('preferences_panel');
     expect(sectionIds).toContain('bookmarks_panel');
+    expect(sectionIds).toContain('immersion_popover');
     expect(sectionIds).toContain('bottom_controls');
 
-    // Verify required elements exist in the actual HTML string
-    for (const section of template.sections) {
-      for (const reqEl of section.requiredElements) {
-        if (reqEl.startsWith('#')) {
-          const id = reqEl.substring(1);
-          expect(template.html).toContain(`id="${id}"`);
-        } else if (reqEl.startsWith('.')) {
-          const className = reqEl.substring(1);
-          expect(template.html).toContain(className);
-        }
-      }
-    }
+    const validation = validateTemplateContract(template.html, 'reader_chamber');
+    expect(validation.valid).toBe(true);
+    expect(validation.missingElements).toEqual([]);
+    expect(validation.missingSections).toEqual([]);
   });
 
   it('should define the Living Codex template with required structural sections', () => {
@@ -42,36 +34,22 @@ describe('SEN Fixed Face Templates Structure & Contract', () => {
     expect(template).toBeDefined();
     expect(template.presetId).toBe('living_codex');
 
-    // Check all required structural sections exist
     const sectionIds = template.sections.map(s => s.id);
     expect(sectionIds).toContain('shell_header');
-    expect(sectionIds).toContain('tab_bar');
-    expect(sectionIds).toContain('portraits_section');
-    expect(sectionIds).toContain('karma_section');
-    expect(sectionIds).toContain('power_section');
-    expect(sectionIds).toContain('artifacts_section');
-    expect(sectionIds).toContain('fate_section');
-    expect(sectionIds).toContain('lore_section');
+    expect(sectionIds).toContain('navigation_sidebar');
+    expect(sectionIds).toContain('content_area');
 
-    // Verify required elements exist in the actual HTML string
-    for (const section of template.sections) {
-      for (const reqEl of section.requiredElements) {
-        if (reqEl.startsWith('#')) {
-          const id = reqEl.substring(1);
-          expect(template.html).toContain(`id="${id}"`);
-        } else if (reqEl.startsWith('.')) {
-          if (reqEl.includes('[')) {
-            const className = reqEl.substring(1, reqEl.indexOf('['));
-            const attr = reqEl.substring(reqEl.indexOf('[') + 1, reqEl.indexOf(']'));
-            expect(template.html).toContain(className);
-            expect(template.html).toContain(attr);
-          } else {
-            const className = reqEl.substring(1);
-            expect(template.html).toContain(className);
-          }
-        }
-      }
-    }
+    const validation = validateTemplateContract(template.html, 'living_codex');
+    expect(validation.valid).toBe(true);
+    expect(validation.missingElements).toEqual([]);
+    expect(validation.missingSections).toEqual([]);
+  });
+
+  it('should reject HTML that removes required template elements', () => {
+    const brokenHtml = '<div id="reader-header">Broken Chamber without controls</div>';
+    const validation = validateTemplateContract(brokenHtml, 'reader_chamber');
+    expect(validation.valid).toBe(false);
+    expect(validation.missingElements.length).toBeGreaterThan(0);
   });
 
   it('should resolve presets correctly via getTemplateForPreset', () => {
