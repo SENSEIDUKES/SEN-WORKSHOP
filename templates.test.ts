@@ -87,7 +87,7 @@ describe('SEN Fixed Face Templates Structure & Contract', () => {
       DEFAULT_SEN_SKIN
     );
 
-    expect(prompt).toContain('MANDATORY FIXED TEMPLATE STRUCTURE CONTRACT');
+    expect(prompt).toContain('MANDATORY CELESTIAL LIBRARY TEMPLATE CONTRACT');
     expect(prompt).toContain('Reader Chamber');
     expect(prompt).toContain('#reader-header');
     expect(prompt).toContain('#reader-controls');

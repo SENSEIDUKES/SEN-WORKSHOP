@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Artifact, Session, ComponentVariation, ModelSettings, AppSkin } from '../types';
 import { generateId, extractHtmlFromMarkdown } from '../utils';
 import { generateContent, generateContentStream, getSettings, getSettingsB } from '../ai';
-import { getEditPrompt, getStylePrompt, getGenerateArtifactPrompt, getGenerateVariationsPrompt, getFusionPrompt, getElementEditPrompt } from '../prompts';
+import { getEditPrompt, getStylePrompt, getGenerateArtifactPrompt, getGenerateVariationsPrompt, getFusionPrompt, getElementEditPrompt, getPromptExpansionPrompt } from '../prompts';
 import { validateTemplateContract } from '../templates';
 
 export interface GenerateOptions {
@@ -188,7 +188,22 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       const settings = getSettings();
       const dnaContext = (options.styleDnaPrompt && options.styleDnaPrompt.trim()) ? `\n**STYLE DNA (User Selected Aesthetics):**\n${options.styleDnaPrompt}\n` : '';
 
-      const stylePrompt = getStylePrompt(trimmedInput, options.componentType, dnaContext, activeSkin);
+      // Step 1: Prompt Expansion
+      let expandedPrompt = trimmedInput;
+      try {
+        const expansionPromptText = getPromptExpansionPrompt(trimmedInput, dnaContext, activeSkin);
+        const expansionRes = await generateContent(expansionPromptText, settings, options.referenceImage);
+        if (expansionRes && expansionRes.text && expansionRes.text.trim().length > 15) {
+          expandedPrompt = expansionRes.text.trim();
+        }
+      } catch (expansionErr) {
+        console.warn("Prompt expansion step failed, using original prompt", expansionErr);
+      }
+
+      setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, expandedPrompt } : s));
+
+      // Step 2: Generate Style Directions using the expanded prompt
+      const stylePrompt = getStylePrompt(expandedPrompt, options.componentType, dnaContext, activeSkin);
 
       const styleResponse = await generateContent(stylePrompt, settings, options.referenceImage);
 
@@ -234,7 +249,7 @@ export function useGenerativeSessions(activeSkin: AppSkin) {
       const generateArtifact = async (artifact: Artifact, styleInstruction: string, activeSettings: ModelSettings) => {
         try {
           const prompt = getGenerateArtifactPrompt(
-            trimmedInput,
+            expandedPrompt,
             options.componentType,
             options.componentInstruction,
             styleInstruction,

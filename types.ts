@@ -56,6 +56,7 @@ export interface Artifact {
 export interface Session {
     id: string;
     prompt: string;
+    expandedPrompt?: string;
     referenceImage?: string; // data URI format
     componentType?: string;
     timestamp: number;
