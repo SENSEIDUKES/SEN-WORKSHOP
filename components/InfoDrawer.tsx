@@ -27,7 +27,40 @@ export default function InfoDrawer({ isOpen, onClose }: InfoDrawerProps) {
                     </p>
                 </div>
 
-                {/* Section 1: Dual Mode */}
+                {/* Section 1: Visual Face Targets */}
+                <div style={{ marginBottom: '28px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                        <span style={{ fontSize: '20px' }}>🎭</span>
+                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.02em' }}>
+                            {t('codex_presets_title')}
+                        </h3>
+                    </div>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                        {t('codex_presets_desc')}
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '10px' }}>
+                            <strong style={{ fontSize: '14px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
+                                📖 {t('codex_preset_icon')}
+                            </strong>
+                            <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                                {t('codex_preset_icon_desc')}
+                            </span>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '10px' }}>
+                            <strong style={{ fontSize: '14px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
+                                🌌 {t('codex_preset_player')}
+                            </strong>
+                            <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                                {t('codex_preset_player_desc')}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 2: Dual Mode & Fusion */}
                 <div style={{ marginBottom: '28px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                         <span style={{ fontSize: '20px' }}>⚡</span>
@@ -67,66 +100,6 @@ export default function InfoDrawer({ isOpen, onClose }: InfoDrawerProps) {
                             <p style={{ margin: 0, fontSize: '13px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
                                 {t('codex_fusion_desc')}
                             </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section 2: Component Presets */}
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '20px' }}>🧬</span>
-                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.02em' }}>
-                            {t('codex_presets_title')}
-                        </h3>
-                    </div>
-                    <p style={{ margin: '0 0 12px 0', fontSize: '13px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                        {t('codex_presets_desc')}
-                    </p>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
-                                🎨 {t('codex_preset_free')}
-                            </strong>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                {t('codex_preset_free_desc')}
-                            </span>
-                        </div>
-
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
-                                ✨ {t('codex_preset_icon')}
-                            </strong>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                {t('codex_preset_icon_desc')}
-                            </span>
-                        </div>
-
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
-                                🎛️ {t('codex_preset_player')}
-                            </strong>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                {t('codex_preset_player_desc')}
-                            </span>
-                        </div>
-
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
-                                🧱 {t('codex_preset_plugin')}
-                            </strong>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                {t('codex_preset_plugin_desc')}
-                            </span>
-                        </div>
-
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--text-color)', display: 'block', marginBottom: '4px' }}>
-                                🧬 {t('codex_preset_deco')}
-                            </strong>
-                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                {t('codex_preset_deco_desc')}
-                            </span>
                         </div>
                     </div>
                 </div>

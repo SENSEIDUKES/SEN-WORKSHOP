@@ -113,7 +113,7 @@ export default function FloatingInput({
                         <div className="animated-placeholder" key={placeholderIndex}>
                             <span className="placeholder-text">
                                 {focusedArtifactIndex !== null 
-                                    ? "Edit this component..." 
+                                    ? "Edit this visual face..." 
                                     : placeholders[placeholderIndex]}
                             </span>
                             {focusedArtifactIndex === null && <span className="tab-hint">Tab</span>}

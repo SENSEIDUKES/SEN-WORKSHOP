@@ -213,7 +213,7 @@ function App() {
           try {
               const settings = getSettings();
               const response = await generateContent(
-                  `Generate 20 creative, short, diverse UI component prompts for music apps (e.g. "granular synth oscillator", "analog delay toggle"). Return ONLY a raw JSON array of strings. IP SAFEGUARD: Avoid referencing specific famous artists, movies, or brands. Return ONLY the JSON raw array string.`,
+                  `Generate 20 creative, short visual face prompts for the SEN Light Novels app (specifically complete faces for either the Reader Chamber reading layout or the Living Codex lore encyclopedia). Return ONLY a raw JSON array of strings. IP SAFEGUARD: Avoid referencing specific trademarked characters or brands. Return ONLY the JSON raw array string.`,
                   settings
               );
               const text = response.text || '[]';
@@ -289,7 +289,7 @@ function App() {
   const handleSendMessage = useCallback(async (manualPrompt?: string) => {
     let promptToUse = manualPrompt || inputValue;
     if (!promptToUse.trim() && referenceImage) {
-        promptToUse = "Extract the palette, mood, texture, symbols, and visual language from the reference image, then generate a music-product UI component inspired by it.";
+        promptToUse = "Extract the palette, mood, texture, symbols, and visual language from the reference image, then generate a complete visual face theme for SEN Light Novels inspired by it.";
     }
     const trimmedInput = promptToUse.trim();
     
